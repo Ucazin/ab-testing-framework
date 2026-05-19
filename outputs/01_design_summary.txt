@@ -1,0 +1,31 @@
+A/B Test Pre-Experiment Design
+==============================
+
+Hypothesis
+    The new checkout-button variant will lift conversion-to-purchase by
+    at least +8% (relative) over baseline.
+
+Inputs
+    Baseline conversion rate (control)   :  5.00%
+    Smallest detectable relative lift    :  +8%
+    Implied treatment conversion rate    :  0.0540
+    Significance level (alpha, 2-sided)  :  0.05
+    Statistical power (1 - beta)         :  0.8
+
+Required sample size
+    Per arm                              :  48,348 visitors
+    Total                                :  96,696 visitors
+
+Traffic and duration
+    Eligible visitors / day              :  12,000
+    Required days to fully power test    :  8.1
+
+Guardrail metrics (must not regress)
+    - Average revenue per visitor (ARPV)
+    - Page-load time
+    - Cart-abandonment rate (anything that signals confusion from the new variant)
+
+Stopping rules
+    - Hard stop at day 9 regardless of significance.
+    - No peeking before day 4.
+    - SRM check at day 2: if chi-square p < 0.01, pause and investigate.
