@@ -1,0 +1,18 @@
+# Simulated data — regenerable from src/02_simulate.py
+data/*.parquet
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# NOTE: outputs/ contents ARE committed (PNGs, DECISION_DOC.md, design summary)
+# so the chart deck and decision memo are visible without running anything.
