@@ -1,5 +1,30 @@
 # A/B Testing Framework
 
+
+## Architecture
+
+```mermaid
+flowchart LR
+    DESIGN["src/01_design.py<br/>Power analysis · sample size"] --> SPEC["outputs/01_design_summary.txt"]
+    DESIGN --> SIM["src/02_simulate.py<br/>60k users, 2 arms"]
+    SIM --> DATA["data/experiment.parquet"]
+    DATA --> VAL["src/03_validity_checks.py<br/>SRM (chi²) · AA test"]
+    DATA --> ANA["src/04_analyze.py<br/>Welch t · Bootstrap · CUPED · BH"]
+    VAL --> REPORT["stdout — pass/fail"]
+    ANA --> DOC["outputs/DECISION_DOC.md<br/>(auto-generated ship/no-ship memo)"]
+    ANA --> CHARTS["outputs/02_results.png<br/>outputs/03_cuped_comparison.png"]
+
+    subgraph STATS["src/stats.py — reusable lib"]
+        Z["two-proportion z"]
+        T["Welch t"]
+        B["bootstrap CI"]
+        C["CUPED"]
+        S["SRM chi²"]
+    end
+    STATS -.-> VAL
+    STATS -.-> ANA
+```
+
 > 🌐 **Live walkthrough:** https://ucazin.github.io/ab-testing-framework/
 
 A working framework for designing, analyzing, and **deciding on** A/B experiments — the kind every product analyst gets handed in their first week. Built around a realistic synthetic experiment ("we changed the checkout button color and want to know if conversion went up"), but the toolkit is dataset-agnostic.
