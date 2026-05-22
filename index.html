@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>A/B Testing Framework · Lucca Cesar</title>
+<meta name="description" content="The full lifecycle of one experiment: power analysis, SRM, CUPED, BH segments, and a written ship/no-ship decision. The framework Microsoft, Booking, and Airbnb actually use." />
+<style>
+  :root { --bg:#f5fbfa; --ink:#0f172a; --muted:#64748b; --accent:#0d9488; --accent-soft:#e6fbf6; --line:#d4ece7; }
+  *,*::before,*::after{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.6}
+  .wrap{max-width:760px;margin:0 auto;padding:48px 24px 96px}
+  .eyebrow{display:inline-block;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:18px}
+  h1{font-family:"Iowan Old Style","Georgia",serif;font-weight:700;font-size:clamp(36px,6vw,56px);line-height:1.08;letter-spacing:-.02em;margin:0 0 24px}
+  h2{font-family:"Iowan Old Style","Georgia",serif;font-weight:700;font-size:clamp(24px,3.4vw,32px);line-height:1.2;margin:56px 0 16px;letter-spacing:-.01em}
+  p{font-size:17px;color:#1f2937;margin:0 0 16px}
+  .lede{font-size:20px;color:var(--muted);margin-bottom:36px}
+  .badges{display:flex;flex-wrap:wrap;gap:8px;margin:24px 0 0}
+  .badge{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);padding:6px 12px;border-radius:999px;font-size:13px;color:#333}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:36px 0 12px}
+  .stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px 22px}
+  .stat .num{font-family:"Iowan Old Style","Georgia",serif;font-size:34px;font-weight:700;letter-spacing:-.02em;color:var(--ink);display:block}
+  .stat .label{font-size:13px;color:var(--muted);margin-top:4px;display:block}
+  .callout{background:var(--accent-soft);border-left:4px solid var(--accent);padding:18px 22px;border-radius:8px;margin:24px 0;font-size:17px}
+  ul.tight{padding-left:1.2em;margin:0 0 16px}
+  ul.tight li{margin-bottom:6px;font-size:17px}
+  a.link{color:var(--accent);text-decoration:underline;text-underline-offset:3px;font-weight:600}
+  .cta{background:var(--ink);color:#fff;border-radius:16px;padding:32px 28px;margin-top:48px;display:flex;flex-direction:column;gap:14px}
+  .cta h2{color:#fff;margin:0;font-size:24px}
+  .cta p{color:#cfcfcf;margin:0}
+  .cta-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+  .btn{display:inline-block;background:#fff;color:var(--ink);padding:11px 18px;border-radius:999px;text-decoration:none;font-weight:600;font-size:14px;border:1px solid #fff}
+  .btn.ghost{background:transparent;color:#fff;border-color:#444}
+  .footer{margin-top:64px;color:var(--muted);font-size:13px;text-align:center}
+  @media (max-width: 540px){ .wrap{padding:32px 20px 80px} h1{font-size:34px} .lede{font-size:18px} }
+</style>
+</head>
+<body>
+  <main class="wrap">
+    <span class="eyebrow">Project 03 · Experimentation · Causal inference</span>
+    <h1>One experiment, run the way Microsoft and Booking actually run them.</h1>
+    <p class="lede">Most A/B-test portfolio projects stop at "I ran a t-test." This one walks the full lifecycle — design, validity, analysis, decision — and ends with a written ship/no-ship memo.</p>
+
+    <div class="stats">
+      <div class="stat"><span class="num">60,000</span><span class="label">users in the synthetic experiment</span></div>
+      <div class="stat"><span class="num">+9.4%</span><span class="label">relative conversion lift (p = 0.0068)</span></div>
+      <div class="stat"><span class="num">SRM ✓</span><span class="label">chi² p = 0.215 — assignment is sound</span></div>
+      <div class="stat"><span class="num">0 / 8</span><span class="label">segments significant after BH correction</span></div>
+    </div>
+
+    <h2>The scenario</h2>
+    <p>We changed the "Pay Now" button from grey to high-contrast green. Did checkout conversion go up by at least 5% relative, without harming revenue per visitor? The decision rule was written <em>before</em> the experiment, not after.</p>
+
+    <h2>What's inside the framework</h2>
+    <ul class="tight">
+      <li><strong>Power analysis</strong> — how many users per arm before you press start. The answer was 48k.</li>
+      <li><strong>SRM detection</strong> — chi-square overall and per segment, catching the bug that invalidates entire experiments and that most candidates skip.</li>
+      <li><strong>Pre-period AA test</strong> — a placebo check confirming the random assignment didn't show fake differences before the treatment started.</li>
+      <li><strong>CUPED variance reduction</strong> — built from scratch, using pre-experiment revenue as the covariate. The technique Microsoft, Netflix, and Booking deploy at scale.</li>
+      <li><strong>Benjamini-Hochberg correction</strong> — applied to the 8-segment breakouts so we don't fool ourselves with multiple-comparison noise.</li>
+      <li><strong>An automatic decision document</strong> — the script writes the ship/no-ship memo when it finishes.</li>
+    </ul>
+
+    <div class="callout">
+      <strong>Why CUPED is the punchline.</strong> In this synthetic experiment, CUPED gave θ ≈ 0.014 — a weak covariate, so the confidence interval barely shrank. That's intentional and instructive: CUPED helps when you have a strong covariate, and not before. In production, you'd build a richer one (last-30-day sessions, page-view depth, tenure) and expect a 30-50% CI reduction. The lever is on the analyst.
+    </div>
+
+    <h2>The decision</h2>
+    <ul class="tight">
+      <li>Conversion: 5.49% → 6.01% (+9.4% relative, p = 0.0068, CI doesn't touch zero).</li>
+      <li>Revenue per visitor: +$0.225 (p = 0.0097, also significant).</li>
+      <li>SRM passes, AA passes, segments are noise after BH.</li>
+      <li><strong>Verdict: SHIP.</strong> Projected annualized revenue at 12k visitors/day: ~$984k.</li>
+    </ul>
+
+    <h2>The tech</h2>
+    <div class="badges">
+      <span class="badge">Python</span>
+      <span class="badge">scipy</span>
+      <span class="badge">statsmodels</span>
+      <span class="badge">numpy</span>
+      <span class="badge">CUPED from scratch</span>
+      <span class="badge">Bootstrap</span>
+      <span class="badge">Benjamini-Hochberg</span>
+    </div>
+
+    <section class="cta">
+      <h2>Want to read the decision doc?</h2>
+      <p>The repo auto-writes a DECISION_DOC.md every run. All inputs documented, every assumption named.</p>
+      <div class="cta-row">
+        <a class="btn" href="https://github.com/Ucazin/ab-testing-framework">View on GitHub</a>
+        <a class="btn ghost" href="https://www.linkedin.com/in/luccamariz/">Connect on LinkedIn</a>
+      </div>
+    </section>
+
+    <div class="footer">
+      Built by <a class="link" href="https://github.com/Ucazin">Lucca Cesar</a> · Data Analyst · open to remote US/CA roles
+    </div>
+  </main>
+</body>
+</html>
