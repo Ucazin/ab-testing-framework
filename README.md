@@ -1,5 +1,7 @@
 # A/B Testing Framework
 
+> 🌐 **Live walkthrough:** https://ucazin.github.io/ab-testing-framework/
+
 A working framework for designing, analyzing, and **deciding on** A/B experiments — the kind every product analyst gets handed in their first week. Built around a realistic synthetic experiment ("we changed the checkout button color and want to know if conversion went up"), but the toolkit is dataset-agnostic.
 
 Most A/B-test portfolio projects stop at "I ran a t-test." This one demonstrates the full lifecycle: **pre-experiment sizing, mid-experiment guardrails, post-experiment analysis with variance reduction, and a written ship/no-ship decision.**
